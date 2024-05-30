@@ -22,7 +22,6 @@ namespace Part1_POE
         {
             Console.WriteLine("Welcome to Your Recipe App!");// A welcome for the user.
 
-            // This asks the user for the number of ingredients and steps
             Console.Write("Please enter the number of ingredients: ");
             int numIngredients = int.Parse(Console.ReadLine());
 
