@@ -20,17 +20,52 @@ namespace Part1_POE
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Welcome to Your Recipe App!");// A welcome for the user.
+            //This is the main menu selection page.
+            Console.WriteLine("Welcome to Your Recipe App!");
+
+            RecipeManager recipeManager = new RecipeManager();
+
+            while (true)
+            {
+                Console.WriteLine("\nChoose an option:");
+                Console.WriteLine("1. Add a new recipe");
+                Console.WriteLine("2. Display all recipes");
+                Console.WriteLine("3. Display a specific recipe");
+                Console.WriteLine("4. Exit");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        AddRecipe(recipeManager);
+                        break;
+                    case "2":
+                        recipeManager.DisplayAllRecipes();
+                        break;
+                    case "3":
+                        DisplaySpecificRecipe(recipeManager);
+                        break;
+                    case "4":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid option, please try again.");
+                        break;
+                }
+            }
+        }
+        //This is for recipe management, from the name to the calories to ingredients.
+        static void AddRecipe(RecipeManager recipeManager)
+        {
+            Console.Write("Please enter the name of the recipe: ");
+            string recipeName = Console.ReadLine();
+
+            Recipe recipe = new Recipe(recipeName);
+            recipe.CaloriesExceeded += Recipe_CaloriesExceeded;
 
             Console.Write("Please enter the number of ingredients: ");
             int numIngredients = int.Parse(Console.ReadLine());
 
-            Console.Write("now, enter the number of steps: ");
-            int numSteps = int.Parse(Console.ReadLine());
-
-            Recipe recipe = new Recipe(numIngredients, numSteps);
-
-            // This is the process it takes to inout the ingredients.
             for (int i = 0; i < numIngredients; i++)
             {
                 Console.Write($"Enter the name of ingredient {i + 1}: ");
@@ -42,28 +77,39 @@ namespace Part1_POE
                 Console.Write($"Enter the unit of measurement for {name}: ");
                 string unit = Console.ReadLine();
 
-                recipe.SetIngredient(i, name, quantity, unit);
+                Console.Write("Enter the number of calories: ");
+                int calories = int.Parse(Console.ReadLine());
+
+                Console.Write("Enter the food group: ");
+                string foodGroup = Console.ReadLine();
+
+                Ingredient ingredient = new Ingredient(name, quantity, unit, calories, foodGroup);
+                ingredient.SetOriginalQuantity(quantity);
+                recipe.AddIngredient(ingredient);
             }
 
-            // User will input instruction steps for the recipe.
+            Console.Write("Now, enter the number of steps: ");
+            int numSteps = int.Parse(Console.ReadLine());
+
             for (int i = 0; i < numSteps; i++)
             {
                 Console.Write($"Enter step {i + 1}: ");
                 string step = Console.ReadLine();
 
-                recipe.SetStep(i, step);
+                recipe.AddStep(step);
             }
 
+            recipeManager.AddRecipe(recipe);
+            Console.WriteLine("Recipe added successfully!");
             recipe.DisplayRecipe();
 
-            // This shows options to the user ,it shows up after the recipe is displayed.
             Console.WriteLine("\nOptions:");
             Console.WriteLine("1. Scale Recipe");
             Console.WriteLine("2. View Original Quantities");
             Console.WriteLine("3. Clear Recipe");
-            Console.WriteLine("4. Exit app");
+            Console.WriteLine("4. Exit to main menu");
 
-            bool exit = false;//This is for data management.
+            bool exit = false;
             while (!exit)
             {
                 Console.Write("\nEnter your choice: ");
@@ -92,6 +138,28 @@ namespace Part1_POE
                         Console.WriteLine("Invalid choice. Please enter a valid option.");
                         break;
                 }
+            }
+        }
+
+        static void Recipe_CaloriesExceeded(object sender, EventArgs e)
+        {
+            Console.WriteLine("Warning: This recipe exceeds 300 calories.");
+        }
+
+        static void DisplaySpecificRecipe(RecipeManager recipeManager)
+        {
+            recipeManager.DisplayAllRecipes();
+            Console.WriteLine("Enter the name of the recipe you want to view:");
+            string name = Console.ReadLine();
+
+            Recipe recipe = recipeManager.GetRecipeByName(name);
+            if (recipe != null)
+            {
+                recipe.Display();
+            }
+            else
+            {
+                Console.WriteLine("Recipe not found.");
             }
         }
     }

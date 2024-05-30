@@ -8,49 +8,70 @@ namespace Part1_POE
 {
     class Recipe
     {
-        private Ingredient[] ingredients;
-        private string[] steps;
+        // Event delegate to let user know when calories exceed 300.
+        public event EventHandler CaloriesExceeded;
 
-        public Recipe(int numIngredients, int numSteps)
+        public string Name { get; }
+        private List<Ingredient> ingredients;
+        private List<string> steps;
+
+        // This constructor initializes recipes with a name, ingredients, and steps.
+        public Recipe(string name)
         {
-            ingredients = new Ingredient[numIngredients];
-            steps = new string[numSteps];
+            Name = name;
+            ingredients = new List<Ingredient>();
+            steps = new List<string>();
         }
 
-        public void SetIngredient(int index, string name, double quantity, string unit) // This helps the storage of original values.
+        // Method to add an ingredient to the recipe
+        public void AddIngredient(Ingredient ingredient)
         {
-            ingredients[index] = new Ingredient { Name = name, Quantity = quantity, Unit = unit };
-            ingredients[index].SetOriginalQuantity(quantity);
+            ingredients.Add(ingredient);
         }
 
-        public void SetStep(int index, string description)
+        // Method to add a step to the recipe
+        public void AddStep(string step)
         {
-            steps[index] = description;
+            steps.Add(step);
         }
 
-        public void DisplayRecipe() //handles display.
+        // Method to display the recipe details
+        public void DisplayRecipe()
         {
-            Console.WriteLine("Recipe:");
+            Console.WriteLine($"Recipe: {Name}");
+            int totalCalories = 0;
+
             Console.WriteLine("Ingredients:");
             foreach (var ingredient in ingredients)
             {
-                Console.WriteLine($"{ingredient.Quantity} {ingredient.Unit} of {ingredient.Name}");
+                Console.WriteLine($"{ingredient.Quantity} {ingredient.Unit} of {ingredient.Name} - {ingredient.Calories} calories (Food Group: {ingredient.FoodGroup})");
+                totalCalories += ingredient.Calories;
             }
-            Console.WriteLine("Steps:");
-            for (int i = 0; i < steps.Length; i++)
+
+            Console.WriteLine("\nSteps:");
+            for (int i = 0; i < steps.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {steps[i]}");
+                Console.WriteLine($"Step {i + 1}: {steps[i]}");
+            }
+
+            Console.WriteLine($"\nTotal Calories: {totalCalories}");
+            if (totalCalories > 300)
+            {
+                CaloriesExceeded?.Invoke(this, EventArgs.Empty);
             }
         }
 
+        // Method to scale the recipe by a given factor
         public void ScaleRecipe(double factor)
         {
             foreach (var ingredient in ingredients)
             {
-                ingredient.Quantity *= factor < 1 ? factor : 1 / factor;
+                ingredient.Quantity *= factor;
+                ingredient.Calories = (int)(ingredient.Calories * factor); // Adjusts calories based on the scaling factor
             }
         }
 
+        // Resets the ingredient quantities to their original values
         public void ResetQuantities()
         {
             foreach (var ingredient in ingredients)
@@ -59,10 +80,17 @@ namespace Part1_POE
             }
         }
 
-        public void ClearRecipe() // This clears the recipe and steps
+        // Clears the recipe ingredients and steps.
+        public void ClearRecipe()
         {
-            Array.Clear(ingredients, 0, ingredients.Length);
-            Array.Clear(steps, 0, steps.Length);
+            ingredients.Clear();
+            steps.Clear();
+        }
+
+        // Displays the recipe
+        public void Display()
+        {
+            DisplayRecipe();
         }
     }
 }
